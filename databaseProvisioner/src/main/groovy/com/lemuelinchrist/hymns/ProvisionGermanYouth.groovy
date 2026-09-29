@@ -16,7 +16,7 @@ class ProvisionGermanYouth {
     Integer stanzaOrderCounter=0;
     String line
     Iterator<String> iterator
-    Integer hymnNumber = 2000;
+    Integer hymnNumber = 0;
     HymnsEntity hymn=null;
     StanzaEntity stanza=null;
     StringBuilder stanzaBuilder=null
@@ -34,6 +34,11 @@ class ProvisionGermanYouth {
     }
 
     void removeGermanHymns() {
+        for(int x=1;x<=271;x++) {
+            dao.delete("GY"+x)
+        }
+        // one-time migration cleanup: this collection used to be provisioned under the 'G' group
+        // as G2001-G2271 before it was split into its own 'GY' group. Remove any leftover legacy rows.
         for(int x=2001;x<=2271;x++) {
             dao.delete("G"+x)
         }
@@ -49,12 +54,14 @@ class ProvisionGermanYouth {
         while (iterator.hasNext()) {
 
             line = iterator.next().trim();
-            if(line.isNumber() || line.toLowerCase().contains("chorus")) {
+            if(line.isNumber() || line.toLowerCase().startsWith("chorus")) {
                 createNewStanza(false)
 
             } else if (line.matches('^YPG.*')) {
                 wrapup()
                 createNewHymn()
+            } else if (line.startsWith("End-note:")) {
+                createNewNote()
             } else if(line.contains("**end**")) {
                 wrapup()
             } else if(!line.isEmpty()){
@@ -65,6 +72,16 @@ class ProvisionGermanYouth {
         }
 
         println("anomalies: " + anomalies.toString())
+    }
+
+    def createNewNote() {
+        stanza = new StanzaEntity()
+        stanza.setNo("note")
+        stanza.setParentHymn(hymn)
+        stanza.text=""
+        stanza.order= ++stanzaOrderCounter
+        hymn.getStanzas().add(stanza)
+        return stanza
     }
 
     def wrapup() {
@@ -109,11 +126,11 @@ class ProvisionGermanYouth {
             throw new Exception("Hymn numbers in text file not in sequence!! no. " + (ypg-1) )
         }
         hymnNumber++;
-        println "******* Generating German Hymn ${hymnNumber}..."
+        println "******* Generating German Youth Hymn ${hymnNumber}..."
         hymn = new HymnsEntity();
-        hymn.id = 'G' + hymnNumber
+        hymn.id = 'GY' + hymnNumber
         hymn.no = hymnNumber.toString()
-        hymn.hymnGroup = 'G'
+        hymn.hymnGroup = 'GY'
         hymn.stanzas = new ArrayList<StanzaEntity>();
         stanzaCounter = 0
         stanzaOrderCounter = 0
@@ -146,7 +163,14 @@ class ProvisionGermanYouth {
                 hymn.verse = nextText.substring(nextText.indexOf(":") + 1).trim()
             } else if (nextText.contains("Soundcloud:")) {
                 soundcloudLink=nextText.substring(nextText.indexOf(":") + 1).trim()
+            } else if (nextText.toLowerCase().contains("hymn code hymnalnet:")) {
+                hymn.tune = nextText.substring(nextText.indexOf(":") + 1).trim()
             } else if (nextText.matches('^[0-9]+$')) {
+                line = nextText;
+                stanza = createNewStanza(false)
+                break
+
+            } else if (nextText.toLowerCase().startsWith("chorus")) {
                 line = nextText;
                 stanza = createNewStanza(false)
                 break

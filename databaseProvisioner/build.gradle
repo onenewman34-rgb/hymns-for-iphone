@@ -4,7 +4,7 @@ buildscript {
         mavenCentral() // For general libraries
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0'
+        classpath 'com.android.tools.build:gradle:8.12.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -41,4 +41,40 @@ dependencies {
     implementation group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '4.0.6'
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.20.1' // Note: jsoup 1.17.2 is the latest as of my last update, but 1.20.1 might be a typo or a specific version you require. Latest is actually higher now. Current latest for Jsoup is 1.17.2 or higher. Let's use 1.17.2 if there's no specific reason for 1.20.1
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.49.1.0' // Latest for sqlite-jdbc is 3.45.3.0, will update to that. Actually, there is a 3.46.0.0. keeping 3.49.1.0 if it works.
+}
+
+task runGreek(type: JavaExec) {
+    dependsOn ":sqlite:importSql"
+    mainClass = 'com.lemuelinchrist.hymns.ProvisionGreek'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task runSpanish2026(type: JavaExec) {
+    dependsOn ":sqlite:importSql"
+    mainClass = 'com.lemuelinchrist.hymns.ProvisionSpanish2026'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task runGermanYouth(type: JavaExec) {
+    dependsOn ":sqlite:importSql"
+    mainClass = 'com.lemuelinchrist.hymns.ProvisionGermanYouth'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task runSpanishSupplement(type: JavaExec) {
+    dependsOn ":sqlite:importSql"
+    mainClass = 'com.lemuelinchrist.hymns.ProvisionSpanishSupplement'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// New Songs sync from hymnal.net (2026-09-05). Runs on top of the current DB state
+// (does NOT reset via importSql) since these scripts only add/update NS hymns by ID.
+task runExtractNS1092To1161(type: JavaExec) {
+    mainClass = 'com.lemuelinchrist.hymns.ExtractNS1092To1161'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task runExtractNS613To614(type: JavaExec) {
+    mainClass = 'com.lemuelinchrist.hymns.ExtractNS613To614'
+    classpath = sourceSets.main.runtimeClasspath
 }

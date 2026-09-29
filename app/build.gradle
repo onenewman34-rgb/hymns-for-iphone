@@ -1,13 +1,8 @@
-// Note: please use similar filename for release: HymnsForAndroidv3.3-Piano
 apply plugin: 'com.android.application'
 apply plugin: 'idea'
 
-// you can choose to put either "guitarSvg" or "pianoSvg" depending on the sheet music you want to include
-//def svgFolderName = "pianoSvg"
-//def svgFolderName=""
-def hymnAppVersion = "v4.19"
-//def androidVersion = '28.0.0'
-// filename: HymnsForAndroidv4.x-PianoAndGuitar.apk
+def hymnAppVersion = "v5.4.6"
+def autoVersionCode = ((System.currentTimeMillis() - 1704067200000L) / 60000).toInteger()
 
 
 allprojects {
@@ -18,26 +13,67 @@ allprojects {
 }
 
 android {
-    namespace 'com.lemuelinchrist.android.hymns'
-    compileSdkVersion 34
+    namespace = 'com.lemuelinchrist.android.hymns'
+    compileSdkVersion 36
 //    buildToolsVersion "28.0.3"
+
+    def keystorePropertiesFile = rootProject.file("keystore.properties")
+    def keystoreProperties = new Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                def keystorePath = keystoreProperties['storeFile']
+                def keystoreFile = new File(keystorePath)
+                if (!keystoreFile.isAbsolute()) {
+                    keystoreFile = rootProject.file(keystorePath)
+                }
+                storeFile keystoreFile
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
 
     defaultConfig {
         applicationId "com.lemuelinchrist.android.hymns"
-        minSdkVersion 15    // Ice cream sandwitch
-        targetSdkVersion 34
-        // increment version code if you want to refresh the database cache of your phone
-        versionCode 223
+        minSdkVersion 21    // Lollipop
+        targetSdkVersion 36
+        // The version code is automatically generated based on the number of minutes since Jan 1, 2024.
+        // This ensures that every build has a higher version code than the last, 
+        // which is required to refresh the database cache of your phone.
+        versionCode autoVersionCode
         versionName hymnAppVersion
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    lintOptions {
-        abortOnError false
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "HymnsForAndroid${hymnAppVersion}-PianoAndGuitar.apk"
+        }
+    }
+
+    // Rename the AAB (App Bundle) output
+    tasks.whenTaskAdded { task ->
+        if (task.name == "bundleRelease") {
+            task.doLast {
+                def bundleFile = file("${buildDir}/outputs/bundle/release/app-release.aab")
+                if (bundleFile.exists()) {
+                    def newName = "HymnsForAndroid${hymnAppVersion}-PianoAndGuitar.aab"
+                    bundleFile.renameTo(new File(bundleFile.parent, newName))
+                }
+            }
+        }
     }
 }
 
@@ -48,10 +84,21 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.preference:preference:1.2.1'
+
+    testImplementation 'junit:junit:4.13.2'
+}
+
+android {
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+    lint {
+        abortOnError = false
+    }
 }
 
 // Make sure importSql runs before assembling the app
-tasks.whenTaskAdded { task ->
+tasks.configureEach { task ->
     if (task.name.contains("assemble") || task.name.contains("compile") || task.name.contains("package")) {
         task.dependsOn(":sqlite:importSql")
     }

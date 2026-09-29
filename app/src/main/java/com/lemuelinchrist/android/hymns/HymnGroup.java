@@ -46,12 +46,20 @@ public enum HymnGroup {
     S("Spanish", Color.rgb(0x3F, 0x51, 0xB5),
             Color.rgb(0x9F, 0xA8, 0xDA),
             Gravity.LEFT),
+    //Indigo
+    SY("Spanish Youth", Color.rgb(0x3F, 0x51, 0xB5),
+            Color.rgb(0x9F, 0xA8, 0xDA),
+            Gravity.LEFT),
     //Brown
     K("Korean", Color.rgb(0x79, 0x55, 0x48),
             Color.rgb(0xBC, 0xAA, 0xA4),
             Gravity.LEFT),
     //Deep Orange
     G("German", Color.rgb(0xFF, 0x57, 0x22),
+            Color.rgb(0xFF, 0xAB, 0x91),
+            Gravity.LEFT),
+    //Deep Orange
+    GY("German Youth", Color.rgb(0xFF, 0x57, 0x22),
             Color.rgb(0xFF, 0xAB, 0x91),
             Gravity.LEFT),
     //Light Green
@@ -81,6 +89,10 @@ public enum HymnGroup {
     // Purple
     SK("Slovak", Color.rgb(0x9C, 0x27, 0xB0),
             Color.rgb(0xBA, 0x68, 0xC8),
+            Gravity.LEFT),
+    //Light Blue
+    GK("Greek", Color.rgb(0x03, 0xA9, 0xF4),
+            Color.rgb(0x4F, 0xC3, 0xF7),
             Gravity.LEFT);
 
     private final String simpleName;

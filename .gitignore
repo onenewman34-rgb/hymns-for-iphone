@@ -4,3 +4,20 @@
 .Ruserdata
 hymnsforandroid.Rproj
 sqlite/nppBackup
+keystore.properties
+hymnsKey.jks
+
+# Antigravity CLI settings
+.antigravitycli/*
+!.antigravitycli/skills/
+!.antigravitycli/commands/
+
+# SQLite database artifacts
+app/src/main/assets/hymns.sqlite
+sqlite/hymns.sqlite
+
+# Keystores
+hymnsKey-new.jks
+
+# Experimental SVG Transcriber project
+music-transcriber/
